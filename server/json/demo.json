@@ -1,0 +1,80 @@
+{
+  "id": "demo",
+  "whitelist": [],
+  "login": {
+    "enabled": true,
+    "endpoint": "/login",
+    "path": "/auth"
+  },
+  "routers" : [
+    {
+      "path": "/api",
+      "routes": [
+        {
+          "public": true,
+          "type": "proxy",
+          "endpoint": "/getLegislators/:id",
+          "method": "get",
+          "request": {
+            "auth": {
+              "type": "API Key",
+              "key": "apikey",
+              "envKey": "PROXY_API_KEY",
+              "method": "query params"
+            },
+            "contentTypes": {
+              "json": ["text/html"]
+            },
+            "headers": [],
+            "dataPath": ["response", "legislator"],
+            "params": [
+              {
+                "name": "id",
+                "type": "route"
+              }, 
+              {
+                "name": "output",
+                "type": "query"
+              }
+            ],
+            "url": "api/?method=getLegislators&id=$id$&output=$output$",
+            "envHostname": "PROXY_HOSTNAME"
+          }
+        }
+      ]
+    },
+    {
+      "path": "/test",
+      "routes": [
+        {
+          "public": true,
+          "type": "proxy",
+          "endpoint": "/getLegislators",
+          "method": "get",
+          "request": {
+            "auth": {
+              "type": "API Key",
+              "key": "apikey",
+              "envKey": "PROXY_API_KEY",
+              "method": "query params"
+            },
+            "headers": [],
+            "dataPath": [],
+            "params": [
+              {
+                "name": "id",
+                "type": "query"
+              }, 
+              {
+                "name": "output",
+                "type": "query"
+              }
+            ],
+            "url": "api/?method=getLegislators&id=$id$&output=$output$",
+            "envHostname": "PROXY_HOSTNAME"
+          }
+        }
+      ]
+    }
+  ]
+}
