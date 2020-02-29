@@ -12,12 +12,16 @@ class Server {
     this.configId = config.id;
     this.database = config.database;
     this.port = config.port || 8080;
+    this.proxy = config.proxy;
   }
 
   init = () => {
     // Init server
     const server = http.createServer(app);
 
+    // Set env config
+    app.set('database', this.database);
+    app.set('proxy', this.proxy);
     // Get & set JSON config
     try {
       const config = this.getConfiguration();

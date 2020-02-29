@@ -4,9 +4,8 @@ import { authRouter } from './routes';
 import RouterUtils from './utils/router';
 
 export default (app) => {
-  // Init router
   const router = express.Router();
-  // Init JSON Config
+  // Get JSON config
   const { login, routers, whitelist } = app.get('config');
 
   // Configure CORS
@@ -26,8 +25,8 @@ export default (app) => {
     router.use(login.path, authRouter);
   }
   routers.forEach((r) => {
-    const newRouter = RouterUtils.generateDynamicRouter(r.routes);
-    router.use(r.path, newRouter);
+    const dynamicRouter = RouterUtils.generateDynamicRouter(r.routes);
+    router.use(r.path, dynamicRouter);
   });
 
   return router;
