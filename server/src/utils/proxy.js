@@ -21,13 +21,13 @@ class ProxyUtils {
     return headers;
   };
 
-  static applyParams = (proxyRequest, reqParams, reqQuery) => {
+  static applyParams = (proxyRequest, reqParams, reqQuery, proxyEnv) => {
     const env = reqQuery.env ? reqQuery.env : 'DEV';
     const { envHostname } = proxyRequest;
     const url =
       env === 'PROD'
-        ? process.env[`${envHostname}_PROD`]
-        : process.env[`${envHostname}_DEV`];
+        ? proxyEnv.hosts[`${envHostname}_PROD`]
+        : proxyEnv.hosts[`${envHostname}_DEV`];
     let result = `${url}${proxyRequest.url}`;
 
     if (proxyRequest.params) {
@@ -48,8 +48,8 @@ class ProxyUtils {
       const { envKey, key } = proxyRequest.auth;
       const apiKey =
         env === 'PROD'
-          ? process.env[`${envKey}_PROD`]
-          : process.env[`${envKey}_DEV`];
+          ? proxyEnv.keys[`${envKey}_PROD`]
+          : proxyEnv.keys[`${envKey}_DEV`];
       result = `${result}&${key}=${apiKey}`;
     }
 

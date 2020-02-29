@@ -5,7 +5,13 @@ import logger from '../config/winston';
 const fetchData = (route) => {
   return async (req, res, next) => {
     try {
-      const url = ProxyUtils.applyParams(route.request, req.params, req.query);
+      const proxyEnv = req.app.get('proxy');
+      const url = ProxyUtils.applyParams(
+        route.request,
+        req.params,
+        req.query,
+        proxyEnv
+      );
       const config = {
         method: route.method,
         headers: ProxyUtils.applyHeaders(route.request, req.query)
