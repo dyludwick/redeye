@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "module": "CommonJS",
+    "outDir": "./build",
+    "strict": true,
+    "target": "es6"
+  },
+  "include": ["./src/**/*"]
+}
