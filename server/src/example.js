@@ -1,5 +1,4 @@
 import Server from './server';
-import {} from 'dotenv/config';
 
 const server = new Server({
   id: process.env.CONFIG_ID,

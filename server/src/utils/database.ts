@@ -1,8 +1,9 @@
 import mysql from '../database/mysql';
-import logger from '../config/winston';
+import { logger } from '../config/winston';
+import { Database } from '../types';
 
 class DatabaseUtils {
-  static initDB = (database) => {
+  static initDB = (database: Database) => {
     switch (database.id) {
       case 'mysql':
         mysql(database).connect();
@@ -12,7 +13,7 @@ class DatabaseUtils {
     }
   };
 
-  static getUser = (database, email) => {
+  static getUser = (database: Database, email: string) => {
     switch (database.id) {
       case 'mysql':
         return mysql(database).getUser(email);

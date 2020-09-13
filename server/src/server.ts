@@ -1,18 +1,25 @@
-import {} from 'dotenv/config';
 import app from './app';
+import { Request, Response } from 'express';
 import fs from 'fs';
 import http from 'http';
 import path from 'path';
 import router from './router';
-import logger from './config/winston';
+import { logger } from './config/winston';
 import DatabaseUtils from './utils/database';
+import { Database, EnvConfig, Proxy } from './types';
 
 class Server {
-  constructor(config) {
+  configId: string;
+  database: Database | undefined;
+  port: number;
+  proxy: Proxy | undefined;
+  server: http.Server | null;
+  constructor(config: EnvConfig) {
     this.configId = config.id;
     this.database = config.database;
-    this.port = config.port || 8080;
+    this.port = config.port ? parseInt(config.port) : 8080;
     this.proxy = config.proxy;
+    this.server = null;
   }
 
   init = () => {
@@ -38,7 +45,7 @@ class Server {
 
     // Init error handling
     // eslint-disable-next-line no-unused-vars
-    app.use((err, req, res, next) => {
+    app.use((err: any, req: Request, res: Response) => {
       logger.error(
         `Error: ${err.status || 500} -
         Message: ${err.message}`
@@ -61,12 +68,12 @@ class Server {
       'json',
       `${this.configId}.json`
     );
-    const config = JSON.parse(fs.readFileSync(jsonPath));
+    const config = JSON.parse(fs.readFileSync(jsonPath).toString());
     return config;
   };
 
   listen = () => {
-    this.server.listen(this.port, () =>
+    this.server?.listen(this.port, () =>
       logger.info(`RedEye listening on port ${this.port}!`)
     );
   };

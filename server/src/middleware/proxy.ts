@@ -1,9 +1,11 @@
-import fetch from 'node-fetch';
+import { Response, NextFunction } from 'express';
+import fetch, { RequestInit } from 'node-fetch';
 import ProxyUtils from '../utils/proxy';
-import logger from '../config/winston';
+import { logger } from '../config/winston';
+import { ConfigRoute, ProxyRequest } from '../types';
 
-const fetchData = (route) => {
-  return async (req, res, next) => {
+const fetchProxyData = (route: ConfigRoute) => {
+  return async (req: ProxyRequest, res: Response, next: NextFunction) => {
     try {
       const proxyEnv = req.app.get('proxy');
       const url = ProxyUtils.applyParams(
@@ -12,9 +14,9 @@ const fetchData = (route) => {
         req.query,
         proxyEnv
       );
-      const config = {
+      const config: RequestInit = {
         method: route.method,
-        headers: ProxyUtils.applyHeaders(route.request, req.query)
+        headers: ProxyUtils.applyHeaders(route.request)
       };
 
       if (
@@ -31,10 +33,10 @@ const fetchData = (route) => {
 
       next();
     } catch (err) {
-      logger.error('fetchData failed');
+      logger.error('fetchProxyData failed');
       next(err);
     }
   };
 };
 
-export { fetchData };
+export { fetchProxyData };

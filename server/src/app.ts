@@ -1,10 +1,9 @@
 import express from 'express';
-import {} from 'dotenv/config';
 import compression from 'compression';
 import bodyParser from 'body-parser';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import logger from './config/winston';
+import { LoggerStream } from './config/winston';
 
 // Init express
 const app = express();
@@ -21,6 +20,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 // Http logging
-app.use(morgan('combined', { stream: logger.stream }));
+app.use(morgan('combined', { stream: new LoggerStream() }));
 
 export default app;

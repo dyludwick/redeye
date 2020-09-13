@@ -9,10 +9,10 @@ const logger = winston.createLogger({
   transports: [new winston.transports.Console()]
 });
 
-logger.stream = {
-  write: (message) => {
+class LoggerStream {
+  write(message: string): void {
     logger.info(message);
   }
-};
+}
 
-export default logger;
+export { logger, LoggerStream };

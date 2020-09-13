@@ -1,9 +1,9 @@
 import fs from 'fs';
 import jwt from 'jsonwebtoken';
-import logger from '../config/winston';
+import { logger } from '../config/winston';
 
-let privateKey;
-let publicKey;
+let privateKey: jwt.Secret;
+let publicKey: jwt.Secret;
 
 try {
   privateKey = fs.readFileSync('private.key', 'utf8');
@@ -16,8 +16,8 @@ try {
 }
 
 class AuthUtils {
-  static signToken = (payload) => {
-    const signOptions = {
+  static signToken = (payload: any) => {
+    const signOptions: jwt.SignOptions = {
       expiresIn: '1h',
       algorithm: 'RS256'
     };
@@ -25,7 +25,7 @@ class AuthUtils {
     return jwt.sign(payload, privateKey, signOptions);
   };
 
-  static verifyToken = (token) => {
+  static verifyToken = (token: any) => {
     const verifyOptions = {
       maxAge: '1h',
       algorithm: ['RS256']

@@ -1,16 +1,27 @@
-const { dest, series, src } = require('gulp');
+const { dest, parallel, src } = require('gulp');
 const sourcemaps = require('gulp-sourcemaps');
-const babel = require('gulp-babel');
+const ts = require('gulp-typescript');
 
-function build() {
-  return src('./src/**/*.js')
+const tsProject = ts.createProject('tsconfig.json');
+
+function buildTypescript() {
+  const tsResult = tsProject.src()
     .pipe(sourcemaps.init())
-    .pipe(babel({
-      presets: ['@babel/preset-env'],
-      plugins: ['@babel/transform-runtime']
-    }))
+    .pipe(tsProject())
+
+  return tsResult.js
     .pipe(sourcemaps.write('.'))
     .pipe(dest('build'));
 }
 
-exports.build = build;
+function buildJSON() {
+  return src('./json/*.json')
+    .pipe(dest('build/json'))
+}
+
+function buildEnv() {
+  return src('./.env', { dot: true })
+    .pipe(dest('build'));
+}
+
+exports.build = parallel(buildTypescript, buildEnv);
