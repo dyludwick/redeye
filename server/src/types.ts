@@ -142,3 +142,10 @@ export interface Proxy {
 export interface ProxyRequest extends Request {
   data?: any;
 }
+
+export interface User {
+  id: number,
+  email: string;
+  password: string;
+  [key: string]: unknown;
+}

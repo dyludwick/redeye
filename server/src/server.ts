@@ -1,5 +1,5 @@
 import app from './app';
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import fs from 'fs';
 import http from 'http';
 import path from 'path';
@@ -43,20 +43,19 @@ class Server {
     // Mount routing middleware
     app.use(router(app));
 
+    // Connect Database
+    if (this.database) {
+      DatabaseUtils.initDB(this.database);
+    }
+
     // Init error handling
-    // eslint-disable-next-line no-unused-vars
-    app.use((err: any, req: Request, res: Response) => {
+    app.use((err: any, req: Request, res: Response, next: NextFunction) => {
       logger.error(
         `Error: ${err.status || 500} -
         Message: ${err.message}`
       );
       res.status(err.status || 500).send(err.message);
     });
-
-    // Connect Database
-    if (this.database) {
-      DatabaseUtils.initDB(this.database);
-    }
 
     this.server = server;
   };
