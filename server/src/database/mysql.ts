@@ -25,7 +25,7 @@ export default (database: Database) => {
     });
 
   const getUser = (username: string) =>
-    new Promise((resolve, reject) => {
+    new Promise<User>((resolve, reject) => {
       connection.query(
         'SELECT * FROM users WHERE email = ?',
         [username],

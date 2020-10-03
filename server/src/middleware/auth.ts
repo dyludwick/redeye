@@ -1,7 +1,7 @@
 import { Response, NextFunction } from 'express';
 import AuthUtils from '../utils/auth';
 import DatabaseUtils from '../utils/database';
-import { AuthRequest, ConfigRoute, Database, User } from '../types';
+import { AuthRequest, ConfigRoute, Database } from '../types';
 import HttpError from '../errors/HttpError';
 
 const fetchToken = (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -68,9 +68,14 @@ const verifyAuth = (route: ConfigRoute) => {
 
 function verifyLogin(database: Database) {
   return async (req: AuthRequest, res: Response, next: NextFunction) => {
+    const { email, password } = req.body;
     try {
-      const user = await DatabaseUtils.getUser(database, req.body.email);
+      const user = await DatabaseUtils.getUser(database, email);
       if (!user) {
+        throw new HttpError(401, 'Invalid username or password');
+      }
+      const match = await AuthUtils.comparePassword(password, user.password);
+      if (!match) {
         throw new HttpError(401, 'Invalid username or password');
       }
       next();

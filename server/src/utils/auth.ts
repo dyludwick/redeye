@@ -18,6 +18,10 @@ try {
 }
 
 class AuthUtils {
+  static comparePassword = (plainTextPassword: string, hash: string) => {
+    return bcrypt.compare(plainTextPassword, hash);
+  }
+
   static hashPassword = async (user: { email: string, password: string }) => {
     const saltRounds = 10;
 
