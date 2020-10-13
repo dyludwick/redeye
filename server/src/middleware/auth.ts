@@ -4,7 +4,7 @@ import DatabaseUtils from '../utils/database';
 import { AuthRequest, ConfigRoute, Database } from '../types';
 import HttpError from '../errors/HttpError';
 
-const fetchToken = (req: AuthRequest, res: Response, next: NextFunction) => {
+function fetchToken(req: AuthRequest, res: Response, next: NextFunction) {
   const payload = {
     email: req.body.Email,
     auth: req.kovaToken
@@ -42,7 +42,7 @@ function registerUser(database: Database) {
   }
 }
 
-const verifyAuth = (route: ConfigRoute) => {
+function verifyAuth(route: ConfigRoute) {
   return async (req: AuthRequest, res: Response, next: NextFunction) => {
     if (route.public) {
       next();

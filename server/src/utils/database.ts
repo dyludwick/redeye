@@ -1,6 +1,6 @@
 import mysql from '../database/mysql';
 import { logger } from '../config/winston';
-import { Database, User } from '../types';
+import { Database } from '../types';
 
 class DatabaseUtils {
   static initDB = (database: Database) => {
