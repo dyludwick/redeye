@@ -6,10 +6,23 @@
     "endpoint": "/login",
     "path": "/auth"
   },
+  "register": {
+    "enabled": true,
+    "endpoint": "/register",
+    "path": "/auth",
+    "public": true
+  },
   "routers" : [
     {
       "path": "/api",
       "routes": [
+        {
+          "public": false,
+          "type": "resource",
+          "endpoint": "/user",
+          "resourceName": "users",
+          "method": "get"
+        },
         {
           "public": true,
           "type": "proxy",
@@ -47,7 +60,7 @@
       "path": "/test",
       "routes": [
         {
-          "public": true,
+          "public": false,
           "type": "proxy",
           "endpoint": "/getLegislators",
           "method": "get",

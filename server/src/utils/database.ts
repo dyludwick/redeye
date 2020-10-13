@@ -21,6 +21,15 @@ class DatabaseUtils {
         logger.warn(`Database: ${database.id} not recognized`);
     }
   };
+
+  static setUser = (database: Database, user: { email: string, password: string }) => {
+    switch (database.id) {
+      case 'mysql':
+        return mysql(database).setUser(user);
+      default:
+        logger.warn(`Database: ${database.id} not recognized`);
+    }
+  };
 }
 
 export default DatabaseUtils;

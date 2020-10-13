@@ -1,6 +1,6 @@
 import mysql from 'mysql';
 import { logger } from '../config/winston';
-import { Database } from '../types';
+import { Database, User } from '../types';
 
 export default (database: Database) => {
   const connection = mysql.createConnection({
@@ -25,21 +25,33 @@ export default (database: Database) => {
     });
 
   const getUser = (username: string) =>
-    new Promise((resolve, reject) => {
+    new Promise<User>((resolve, reject) => {
       connection.query(
-        'SELECT * FROM `users` WHERE `email` = ?',
+        'SELECT * FROM users WHERE email = ?',
         [username],
         (error, results) => {
           if (error) {
             reject(error);
           }
           if (results.length === 0) {
-            reject(new Error());
+            resolve(undefined);
           }
+          resolve(results[0]);
+        }
+      );
+    });
+
+  const setUser = (user: { email: string, password: string}) =>
+    new Promise((resolve, reject) => {
+      connection.query(
+        'INSERT INTO users SET ?',
+        user,
+        (error, results) => {
+          if (error) reject(error);
           resolve(results);
         }
       );
     });
 
-  return { connect, getUser };
+  return { connect, getUser, setUser };
 };
