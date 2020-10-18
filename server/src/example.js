@@ -22,5 +22,12 @@ const server = new Server({
     }
   }
 });
-server.init();
-server.listen();
+
+(async () => {
+  try {
+    await server.init();
+    server.listen();
+  } catch (error) {
+    console.log(error);
+  }
+})();

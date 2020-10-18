@@ -1,5 +1,8 @@
-import { Request } from 'express';
+import express, { Request } from 'express';
 import { IncomingHttpHeaders } from 'http';
+import mysql from 'mysql';
+
+export type App = express.Application;
 
 export interface AuthRequest extends Request {
   decoded?: object | string;
@@ -31,13 +34,13 @@ enum ConfigRequestAuthType {
 
 // export type ConfigRequestAuthTypes = Record<ConfigRequestAuthType, string>
 
-export type ConfigRequestAuthTypes = keyof typeof ConfigRequestAuthType
+export type ConfigRequestAuthTypes = keyof typeof ConfigRequestAuthType;
 
 enum ConfigRequestAuthMethod {
   'query params'
 }
 
-export type ConfigRequestAuthMethods = keyof typeof ConfigRequestAuthMethod
+export type ConfigRequestAuthMethods = keyof typeof ConfigRequestAuthMethod;
 
 export interface ConfigRequestContentTypes {
   [index: string]: Array<ContentTypeValues>
@@ -62,7 +65,7 @@ enum ConfigRequestParamType {
   query
 }
 
-export type ConfigRequestParamTypes = keyof typeof ConfigRequestParamType
+export type ConfigRequestParamTypes = keyof typeof ConfigRequestParamType;
 
 export interface ConfigRoute {
   endpoint: string;
@@ -85,13 +88,13 @@ enum ConfigRouteMethod {
   put
 }
 
-export type ConfigRouteMethods = keyof typeof ConfigRouteMethod
+export type ConfigRouteMethods = keyof typeof ConfigRouteMethod;
 
 enum ConfigRouteType {
   proxy
 }
 
-export type ConfigRouteTypes = keyof typeof ConfigRouteType
+export type ConfigRouteTypes = keyof typeof ConfigRouteType;
 
 enum ContentTypeValue {
   'application/json',
@@ -103,11 +106,18 @@ enum ContentTypeValue {
   'text/xml'
 }
 
-export type ContentTypeValues = keyof typeof ContentTypeValue
+enum ConnectionKey {
+  'mysqlConnection'
+}
+
+export type ConnectionKeys = keyof typeof ConnectionKey;
+
+export type ContentTypeValues = keyof typeof ContentTypeValue;
 
 export interface Database {
   readonly id: string;
   readonly host: string;
+  mysqlConnection?: MySqlConnection;
   readonly name: string;
   readonly password: string;
   readonly port: number;
@@ -133,6 +143,8 @@ export interface FetchRequestConfig {
   headers: HeadersInit;
   method: string;
 }
+
+export type MySqlConnection = mysql.Connection;
 
 export interface Proxy {
   hosts: { [key: string]: string };

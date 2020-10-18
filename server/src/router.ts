@@ -2,9 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import { authRouter } from './routes';
 import RouterUtils from './utils/router';
-import { ConfigRouter } from './types';
+import { App, ConfigRouter } from './types';
 
-export default (app: express.Application) => {
+export default (app: App) => {
   const router = express.Router();
   // Get JSON config
   const { login, routers, whitelist } = app.get('config');
