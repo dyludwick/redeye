@@ -22,13 +22,13 @@ class Server {
     this.server = null;
   }
 
-  init = () => {
+  init = async () => {
     // Init server
     const server = http.createServer(app);
 
     // Set env config
-    app.set('database', this.database);
     app.set('proxy', this.proxy);
+
     // Get & set JSON config
     try {
       const config = this.getConfiguration();
@@ -40,13 +40,13 @@ class Server {
       );
     }
 
-    // Mount routing middleware
-    app.use(router(app));
-
     // Connect Database
     if (this.database) {
-      DatabaseUtils.initDB(this.database);
+      await DatabaseUtils.initDB(app, this.database);
     }
+
+    // Mount routing middleware
+    app.use(router(app));
 
     // Init error handling
     app.use((err: any, req: Request, res: Response, next: NextFunction) => {

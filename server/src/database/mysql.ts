@@ -2,31 +2,33 @@ import mysql from 'mysql';
 import { logger } from '../config/winston';
 import { Database, User } from '../types';
 
-export default (database: Database) => {
-  const connection = mysql.createConnection({
-    host: database.host || 'localhost',
-    port: database.port || 3306,
-    user: database.user || 'root',
-    password: database.password
-  });
+export default class MySql {
+  static connect = (database: Database) => {
+    const connection = mysql.createConnection({
+      host: database.host || 'localhost',
+      port: database.port || 3306,
+      user: database.user || 'root',
+      password: database.password
+    });
 
-  const connect = () =>
-    new Promise((resolve, reject) => {
+    return new Promise<mysql.Connection>((resolve, reject) => {
       connection.connect((error) => {
         if (error) {
-          logger.error(`error connecting MySQL: ${error}`);
           reject(error);
           return;
         }
 
         logger.info(`MySQL connected as id ${connection.threadId}`);
-        resolve();
+        resolve(connection);
       });
     });
-  
-  const checkDB = () =>
+  }
+
+  static checkDB = (database: Database) =>
     new Promise((resolve, reject) => {
-      connection.query(
+      const { mysqlConnection } = database;
+
+      mysqlConnection?.query(
         `SHOW DATABASES WHERE \`Database\` = '${database.name}'`,
         (error, result) => {
           if (error) {
@@ -42,10 +44,12 @@ export default (database: Database) => {
         }
       );
     });
-  
-  const selectDB = () =>
+
+  static selectDB = (database: Database) =>
     new Promise((resolve, reject) => {
-      connection.changeUser({database: database.name}, (error) => {
+      const { mysqlConnection } = database;
+
+      mysqlConnection?.changeUser({database: database.name}, (error) => {
         if (error) {
           reject(error);
           return;
@@ -55,41 +59,45 @@ export default (database: Database) => {
         resolve();
       })
     });
-  
-    const createDB = () =>
-      new Promise((resolve, reject) => {
-        connection.query(
-          `CREATE DATABASE ${database.name}`,
-          (error) => {
-            if (error) {
-              reject(error);
-              return;
-            }
-  
-            logger.info(`MySQL created database: ${database.name}`);
-            resolve();
-          }
-        );
-      });
 
-  const setDB = async () => {
+  static createDB = (database: Database) =>
+    new Promise((resolve, reject) => {
+      const { mysqlConnection } = database;
+
+      mysqlConnection?.query(
+        `CREATE DATABASE ${database.name}`,
+        (error) => {
+          if (error) {
+            reject(error);
+            return;
+          }
+
+          logger.info(`MySQL created database: ${database.name}`);
+          resolve();
+        }
+      );
+    });
+
+  static setDB = async (database: Database) => {
     try {
-      const dbExists = await checkDB();
+      const dbExists = await MySql.checkDB(database);
 
       if (dbExists) {
-        await selectDB();
+        await MySql.selectDB(database);
       } else {
-        await createDB();
-        await selectDB();
+        await MySql.createDB(database);
+        await MySql.selectDB(database);
       }
     } catch (err) {
       throw err;
     }
   }
 
-  const getUser = (username: string) =>
+  static getUser = (database: Database, username: string) =>
     new Promise<User>((resolve, reject) => {
-      connection.query(
+      const { mysqlConnection } = database;
+
+      mysqlConnection?.query(
         'SELECT * FROM users WHERE email = ?',
         [username],
         (error, results) => {
@@ -104,9 +112,11 @@ export default (database: Database) => {
       );
     });
 
-  const setUser = (user: { email: string, password: string}) =>
+  static setUser = (database: Database, user: { email: string, password: string}) =>
     new Promise((resolve, reject) => {
-      connection.query(
+      const { mysqlConnection } = database;
+
+      mysqlConnection?.query(
         'INSERT INTO users SET ?',
         user,
         (error, results) => {
@@ -115,6 +125,4 @@ export default (database: Database) => {
         }
       );
     });
-
-  return { connect, getUser, setDB, setUser };
-};
+}

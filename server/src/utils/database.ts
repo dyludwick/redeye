@@ -1,40 +1,61 @@
-import mysql from '../database/mysql';
+import MySql from '../database/mysql';
 import { logger } from '../config/winston';
-import { Database } from '../types';
+import {
+  App,
+  ConnectionKeys,
+  Database,
+  MySqlConnection
+} from '../types';
 
-class DatabaseUtils {
-  static initDB = async (database: Database) => {
+export default class DatabaseUtils {
+  static initDB = async (app: App, database: Database) => {
     try {
       switch (database.id) {
         case 'mysql':
-          await mysql(database).connect();
-          await mysql(database).setDB();
-          break;
+          const connection = await MySql.connect(database);
+          const connectedDB = DatabaseUtils.setConnection(
+            connection,
+            'mysqlConnection',
+            database
+          );
+          app.set('database', connectedDB);
+          await MySql.setDB(connectedDB);
+          return;
         default:
           logger.warn(`Database: ${database.id} not recognized`);
       }
     } catch (err) {
       logger.error(`Failed to initialize DB: ${err}`);
+      throw err;
     }
   };
 
   static getUser = (database: Database, email: string) => {
     switch (database.id) {
       case 'mysql':
-        return mysql(database).getUser(email);
+        return MySql.getUser(database, email);
       default:
         logger.warn(`Database: ${database.id} not recognized`);
     }
   };
 
+  static setConnection = (
+    connection: MySqlConnection,
+    connectionKey: ConnectionKeys, 
+    database: Database
+  ) => {
+    const connectedDB = { ...database };
+    connectedDB[connectionKey] = connection;
+
+    return connectedDB;
+  }
+
   static setUser = (database: Database, user: { email: string, password: string }) => {
     switch (database.id) {
       case 'mysql':
-        return mysql(database).setUser(user);
+        return MySql.setUser(database, user);
       default:
         logger.warn(`Database: ${database.id} not recognized`);
     }
   };
 }
-
-export default DatabaseUtils;
