@@ -3,13 +3,18 @@ import { logger } from '../config/winston';
 import { Database } from '../types';
 
 class DatabaseUtils {
-  static initDB = (database: Database) => {
-    switch (database.id) {
-      case 'mysql':
-        mysql(database).connect();
-        break;
-      default:
-        logger.warn(`Database: ${database.id} not recognized`);
+  static initDB = async (database: Database) => {
+    try {
+      switch (database.id) {
+        case 'mysql':
+          await mysql(database).connect();
+          await mysql(database).setDB();
+          break;
+        default:
+          logger.warn(`Database: ${database.id} not recognized`);
+      }
+    } catch (err) {
+      logger.error(`Failed to initialize DB: ${err}`);
     }
   };
 
