@@ -26,7 +26,7 @@ const fetchProxyData = (route: ConfigRoute) => {
       ) {
         config.body = JSON.stringify(req.body);
       }
-
+      await new Promise(resolve => setTimeout(resolve, 5000));
       const response = await fetch(url, config);
       const data = await ProxyUtils.parseData(route, response);
       req.data = data;

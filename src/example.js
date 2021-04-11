@@ -26,8 +26,8 @@ const server = new Server({
 
 (async () => {
   try {
-    await server.init();
-    server.listen();
+    const instance = await server.init();
+    server.listen(instance);
   } catch (error) {
     console.log(error);
   }

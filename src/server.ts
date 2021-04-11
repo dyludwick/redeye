@@ -1,5 +1,5 @@
 import app from './app';
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import fs from 'fs';
 import http from 'http';
 import path from 'path';
@@ -7,6 +7,9 @@ import router from './router';
 import { logger } from './config/winston';
 import DatabaseUtils from './utils/database';
 import { Database, EnvConfig, Proxy } from './types';
+import {
+  createHttpTerminator,
+} from 'http-terminator';
 
 class Server {
   configId: string;
@@ -49,7 +52,7 @@ class Server {
     app.use(router(app));
 
     // Init error handling
-    app.use((err: any, req: Request, res: Response) => {
+    app.use((err: any, req: Request, res: Response, next: NextFunction) => {
       logger.error(
         `Error: ${err.status || 500} -
         Message: ${err.message}`
@@ -58,6 +61,7 @@ class Server {
     });
 
     this.server = server;
+    return server;
   };
 
   getConfiguration = () => {
@@ -71,11 +75,19 @@ class Server {
     return config;
   };
 
-  listen = () => {
-    this.server?.listen(this.port, () =>
+  listen = async (server: http.Server) => {
+    await this.server?.listen(this.port, () =>
       logger.info(`RedEye listening on port ${this.port}!`)
     );
+    process.on('SIGINT', async function() {
+      console.log('yo');
+      // Dylan Is a tool
+      server.close();
+    });
   };
+
+  
 }
+
 
 export default Server;
