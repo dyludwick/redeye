@@ -7,7 +7,7 @@ const isPublicKey = fs.existsSync('public.key');
 
 if (!isPrivateKey && !isPublicKey) {
   // Generate 512 bit RSA key pair
-  const key = new NodeRSA({b: 512});
+  const key = new NodeRSA({ b: 512 });
   const privateKey = key.exportKey('pkcs1-private-pem');
   const publicKey = key.exportKey('pkcs1-public-pem');
 
@@ -19,4 +19,3 @@ if (!isPrivateKey && !isPublicKey) {
 } else {
   console.log('Keys already exist');
 }
-
