@@ -81,8 +81,13 @@ class Server {
     );
     process.on('SIGINT', async function() {
       console.log('yo');
-      // Dylan Is a tool
-      server.close();
+      // Dylan is a huge tool
+      // server.close();
+      const httpTerminator = createHttpTerminator({
+        server,
+      });
+      
+      await httpTerminator.terminate();
     });
   };
 
