@@ -1,17 +1,12 @@
 import MySql from '../database/mysql';
 import { logger } from '../config/winston';
-import {
-  App,
-  ConnectionKeys,
-  Database,
-  MySqlConnection
-} from '../types';
+import { App, ConnectionKeys, Database, MySqlConnection } from '../types';
 
 export default class DatabaseUtils {
   static initDB = async (app: App, database: Database) => {
     try {
       switch (database.id) {
-        case 'mysql':
+        case 'mysql': {
           const connection = await MySql.connect(database);
           const connectedDB = DatabaseUtils.setConnection(
             connection,
@@ -21,6 +16,7 @@ export default class DatabaseUtils {
           app.set('database', connectedDB);
           await MySql.setDB(connectedDB);
           return;
+        }
         default:
           logger.warn(`Database: ${database.id} not recognized`);
       }
@@ -41,16 +37,19 @@ export default class DatabaseUtils {
 
   static setConnection = (
     connection: MySqlConnection,
-    connectionKey: ConnectionKeys, 
+    connectionKey: ConnectionKeys,
     database: Database
   ) => {
     const connectedDB = { ...database };
     connectedDB[connectionKey] = connection;
 
     return connectedDB;
-  }
+  };
 
-  static setUser = (database: Database, user: { email: string, password: string }) => {
+  static setUser = (
+    database: Database,
+    user: { email: string; password: string }
+  ) => {
     switch (database.id) {
       case 'mysql':
         return MySql.setUser(database, user);

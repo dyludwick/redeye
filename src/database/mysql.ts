@@ -22,7 +22,7 @@ export default class MySql {
         resolve(connection);
       });
     });
-  }
+  };
 
   static checkDB = (database: Database) =>
     new Promise((resolve, reject) => {
@@ -46,10 +46,10 @@ export default class MySql {
     });
 
   static selectDB = (database: Database) =>
-    new Promise((resolve, reject) => {
+    new Promise<void>((resolve, reject) => {
       const { mysqlConnection } = database;
 
-      mysqlConnection?.changeUser({database: database.name}, (error) => {
+      mysqlConnection?.changeUser({ database: database.name }, (error) => {
         if (error) {
           reject(error);
           return;
@@ -57,44 +57,37 @@ export default class MySql {
 
         logger.info(`MySQL selected database: ${database.name}`);
         resolve();
-      })
+      });
     });
 
   static createDB = (database: Database) =>
-    new Promise((resolve, reject) => {
+    new Promise<void>((resolve, reject) => {
       const { mysqlConnection } = database;
 
-      mysqlConnection?.query(
-        `CREATE DATABASE ${database.name}`,
-        (error) => {
-          if (error) {
-            reject(error);
-            return;
-          }
-
-          logger.info(`MySQL created database: ${database.name}`);
-          resolve();
+      mysqlConnection?.query(`CREATE DATABASE ${database.name}`, (error) => {
+        if (error) {
+          reject(error);
+          return;
         }
-      );
+
+        logger.info(`MySQL created database: ${database.name}`);
+        resolve();
+      });
     });
 
   static setDB = async (database: Database) => {
-    try {
-      const dbExists = await MySql.checkDB(database);
+    const dbExists = await MySql.checkDB(database);
 
-      if (dbExists) {
-        await MySql.selectDB(database);
-      } else {
-        await MySql.createDB(database);
-        await MySql.selectDB(database);
-      }
-    } catch (err) {
-      throw err;
+    if (dbExists) {
+      await MySql.selectDB(database);
+    } else {
+      await MySql.createDB(database);
+      await MySql.selectDB(database);
     }
-  }
+  };
 
   static getUser = (database: Database, username: string) =>
-    new Promise<User>((resolve, reject) => {
+    new Promise<User | undefined>((resolve, reject) => {
       const { mysqlConnection } = database;
 
       mysqlConnection?.query(
@@ -112,7 +105,10 @@ export default class MySql {
       );
     });
 
-  static setUser = (database: Database, user: { email: string, password: string}) =>
+  static setUser = (
+    database: Database,
+    user: { email: string; password: string }
+  ) =>
     new Promise((resolve, reject) => {
       const { mysqlConnection } = database;
 
