@@ -25,6 +25,7 @@ module.exports = {
         "ignoreTemplateLiterals": true,
         "ignoreRegExpLiterals": true
       }
-    ]
+    ],
+    "no-unused-vars": ["error", { "argsIgnorePattern": "next" }]
   }
 }
