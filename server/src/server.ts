@@ -1,5 +1,5 @@
 import app from './app';
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import fs from 'fs';
 import http from 'http';
 import path from 'path';
@@ -49,7 +49,7 @@ class Server {
     app.use(router(app));
 
     // Init error handling
-    app.use((err: any, req: Request, res: Response) => {
+    app.use((err: any, req: Request, res: Response, next: NextFunction) => {
       logger.error(
         `Error: ${err.status || 500} -
         Message: ${err.message}`

@@ -16,8 +16,9 @@ function fetchToken(req: AuthRequest, res: Response, next: NextFunction) {
     next();
   } catch (err) {
     next(err);
+
   }
-}
+};
 
 function registerUser(database: Database) {
   return async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -26,12 +27,9 @@ function registerUser(database: Database) {
       throw new HttpError(400, 'Bad Request');
     }
     const user = { email, password };
-
+  
     try {
-      const existingUser = await DatabaseUtils.getUser(
-        database,
-        req.body.email
-      );
+      const existingUser = await DatabaseUtils.getUser(database, req.body.email);
       if (existingUser) {
         throw new HttpError(409, 'Conflict');
       }
@@ -41,7 +39,7 @@ function registerUser(database: Database) {
     } catch (err) {
       next(err);
     }
-  };
+  }
 }
 
 function verifyAuth(route: ConfigRoute) {
@@ -66,7 +64,7 @@ function verifyAuth(route: ConfigRoute) {
       }
     }
   };
-}
+};
 
 function verifyLogin(database: Database) {
   return async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -84,7 +82,7 @@ function verifyLogin(database: Database) {
     } catch (err) {
       next(err);
     }
-  };
-}
+  }
+};
 
 export { fetchToken, registerUser, verifyAuth, verifyLogin };

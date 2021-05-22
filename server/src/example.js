@@ -7,7 +7,6 @@ const server = new Server({
     host: process.env.DB_HOST,
     name: process.env.DB_NAME,
     password: process.env.DB_PASSWORD,
-    pool: process.env.DB_POOL ? true : false,
     port: process.env.DB_PORT,
     user: process.env.DB_USER
   },

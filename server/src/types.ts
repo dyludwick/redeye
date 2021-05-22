@@ -117,10 +117,9 @@ export type ContentTypeValues = keyof typeof ContentTypeValue;
 export interface Database {
   readonly id: string;
   readonly host: string;
-  mysqlConnection?: MySqlConnection | MySqlPool;
+  mysqlConnection?: MySqlConnection;
   readonly name: string;
   readonly password: string;
-  readonly pool: boolean;
   readonly port: number;
   readonly user: string;
 }
@@ -146,8 +145,6 @@ export interface FetchRequestConfig {
 }
 
 export type MySqlConnection = mysql.Connection;
-
-export type MySqlPool = mysql.Pool;
 
 export interface Proxy {
   hosts: { [key: string]: string };
