@@ -1,11 +1,18 @@
 module.exports = {
-  "parser": "babel-eslint",
-  "extends": ["eslint:recommended", "plugin:prettier/recommended"],
+  "parser": "@typescript-eslint/parser",
+  "extends": [
+    "eslint:recommended",
+    "plugin:prettier/recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking"
+  ],
   "parserOptions": {
+    "project": "./tsconfig.json",
     "sourceType": "module"
   },
   "plugins": [
-    "import"
+    "import",
+    "@typescript-eslint"
   ],
   "env": {
     "es6": true,
