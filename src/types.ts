@@ -1,6 +1,7 @@
-import express, { Request } from 'express';
-import { IncomingHttpHeaders } from 'http';
-import mysql from 'mysql';
+import type express from 'express';
+import type { Request } from 'express';
+import type { IncomingHttpHeaders } from 'http';
+import type mysql from 'mysql';
 
 export type App = express.Application;
 
@@ -29,7 +30,7 @@ export interface ConfigRequestAuth {
 }
 
 enum ConfigRequestAuthType {
-  'API Key'
+  'API Key',
 }
 
 // export type ConfigRequestAuthTypes = Record<ConfigRequestAuthType, string>
@@ -117,9 +118,10 @@ export type ContentTypeValues = keyof typeof ContentTypeValue;
 export interface Database {
   readonly id: string;
   readonly host: string;
-  mysqlConnection?: MySqlConnection;
+  mysqlConnection?: MySqlConnection | MySqlPool;
   readonly name: string;
   readonly password: string;
+  readonly pool: boolean;
   readonly port: number;
   readonly user: string;
 }
@@ -145,6 +147,8 @@ export interface FetchRequestConfig {
 }
 
 export type MySqlConnection = mysql.Connection;
+
+export type MySqlPool = mysql.Pool;
 
 export interface Proxy {
   hosts: { [key: string]: string };

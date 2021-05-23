@@ -1,6 +1,12 @@
 import MySql from '../database/mysql';
 import { logger } from '../config/winston';
-import { App, ConnectionKeys, Database, MySqlConnection } from '../types';
+import {
+  App,
+  ConnectionKeys,
+  Database,
+  MySqlConnection,
+  MySqlPool
+} from '../types';
 
 export default class DatabaseUtils {
   static initDB = async (app: App, database: Database) => {
@@ -14,7 +20,7 @@ export default class DatabaseUtils {
             database
           );
           app.set('database', connectedDB);
-          await MySql.setDB(connectedDB);
+          await MySql.setDB(app, connectedDB);
           return;
         }
         default:
@@ -36,7 +42,7 @@ export default class DatabaseUtils {
   };
 
   static setConnection = (
-    connection: MySqlConnection,
+    connection: MySqlConnection | MySqlPool,
     connectionKey: ConnectionKeys,
     database: Database
   ) => {
