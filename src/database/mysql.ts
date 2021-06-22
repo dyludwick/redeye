@@ -3,13 +3,13 @@ import { logger } from '../config/winston';
 import { App, Database, User } from '../types';
 
 export default class MySql {
-  static checkDB = (database: Database) =>
+  static checkDB = (database: Database): Promise<boolean | void> =>
     new Promise((resolve, reject) => {
       const { mysqlConnection } = database;
 
       mysqlConnection?.query(
         `SHOW DATABASES WHERE \`Database\` = '${database.name}'`,
-        (error, result) => {
+        (error, result: unknown[]) => {
           if (error) {
             reject(error);
             return;
@@ -20,24 +20,25 @@ export default class MySql {
           } else {
             resolve(false);
           }
-        }
+        },
       );
     });
 
-  static connect = (database: Database) => {
+  static connect = (
+    database: Database,
+  ): mysql.Pool | Promise<mysql.Connection> => {
     if (database.pool) {
       return MySql.createPool(database);
-    } else {
-      return MySql.createConnection(database);
     }
+    return MySql.createConnection(database);
   };
 
-  static createConnection = (database: Database) => {
+  static createConnection = (database: Database): Promise<mysql.Connection> => {
     const connection = mysql.createConnection({
       host: database.host || 'localhost',
       port: database.port || 3306,
       user: database.user || 'root',
-      password: database.password
+      password: database.password,
     });
 
     return new Promise<mysql.Connection>((resolve, reject) => {
@@ -47,13 +48,15 @@ export default class MySql {
           return;
         }
 
-        logger.info(`MySQL connected as id ${connection.threadId}`);
+        logger.info(
+          `MySQL connected as id ${connection.threadId?.toString() || 'null'}`,
+        );
         resolve(connection);
       });
     });
   };
 
-  static createDB = (database: Database) =>
+  static createDB = (database: Database): Promise<void> =>
     new Promise<void>((resolve, reject) => {
       const { mysqlConnection } = database;
 
@@ -68,31 +71,37 @@ export default class MySql {
       });
     });
 
-  static createPool = (database: Database, databaseName?: string) => {
+  static createPool = (
+    database: Database,
+    databaseName?: string,
+  ): mysql.Pool => {
     const pool = mysql.createPool({
       database: databaseName,
       host: database.host || 'localhost',
       password: database.password,
       port: database.port || 3306,
-      user: database.user || 'root'
+      user: database.user || 'root',
     });
 
     logger.info(
       databaseName
         ? `MySQL created pool assigned to database: ${database.name}`
-        : `MySQL created pool`
+        : 'MySQL created pool',
     );
     return pool;
   };
 
-  static getUser = (database: Database, username: string) =>
+  static getUser = (
+    database: Database,
+    username: string,
+  ): Promise<User | undefined> =>
     new Promise<User | undefined>((resolve, reject) => {
       const { mysqlConnection } = database;
 
       mysqlConnection?.query(
         'SELECT * FROM users WHERE email = ?',
         [username],
-        (error, results) => {
+        (error, results: User[]) => {
           if (error) {
             reject(error);
           }
@@ -100,11 +109,11 @@ export default class MySql {
             resolve(undefined);
           }
           resolve(results[0]);
-        }
+        },
       );
     });
 
-  static selectDB = (app: App, database: Database) =>
+  static selectDB = (app: App, database: Database): Promise<string> =>
     new Promise<Database['name']>((resolve, reject) => {
       const { mysqlConnection } = database;
 
@@ -126,12 +135,12 @@ export default class MySql {
             reject(error);
             return;
           }
-          logger.info(`MySQL ended pool`);
+          logger.info('MySQL ended pool');
 
           const updatedDB = { ...database };
-          updatedDB['mysqlConnection'] = MySql.createPool(
+          updatedDB.mysqlConnection = MySql.createPool(
             updatedDB,
-            database.name
+            database.name,
           );
           app.set('database', updatedDB);
 
@@ -140,11 +149,11 @@ export default class MySql {
       }
     });
 
-  static setDB = async (app: App, database: Database) => {
+  static setDB = async (app: App, database: Database): Promise<void> => {
     const dbExists = await MySql.checkDB(database);
 
     if (dbExists) {
-      logger.info(`MySQL found database`);
+      logger.info('MySQL found database');
       await MySql.selectDB(app, database);
     } else {
       await MySql.createDB(database);
@@ -154,18 +163,14 @@ export default class MySql {
 
   static setUser = (
     database: Database,
-    user: { email: string; password: string }
-  ) =>
+    user: { email: string; password: string },
+  ): Promise<void> =>
     new Promise((resolve, reject) => {
       const { mysqlConnection } = database;
 
-      mysqlConnection?.query(
-        'INSERT INTO users SET ?',
-        user,
-        (error, results) => {
-          if (error) reject(error);
-          resolve(results);
-        }
-      );
+      mysqlConnection?.query('INSERT INTO users SET ?', user, (error) => {
+        if (error) return reject(error);
+        return resolve();
+      });
     });
 }

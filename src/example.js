@@ -7,28 +7,27 @@ const server = new Server({
     host: process.env.DB_HOST,
     name: process.env.DB_NAME,
     password: process.env.DB_PASSWORD,
-    pool: process.env.DB_POOL ? true : false,
+    pool: process.env.DB_POOL.toLowerCase() === 'true',
     port: process.env.DB_PORT,
-    user: process.env.DB_USER
+    user: process.env.DB_USER,
   },
   port: process.env.PORT,
   proxy: {
     hosts: {
       PROXY_HOSTNAME_DEV: process.env.PROXY_HOSTNAME_DEV,
-      PROXY_HOSTNAME_PROD: process.env.PROXY_HOSTNAME_PROD
+      PROXY_HOSTNAME_PROD: process.env.PROXY_HOSTNAME_PROD,
     },
     keys: {
       PROXY_API_KEY_DEV: process.env.PROXY_API_KEY_DEV,
-      PROXY_API_KEY_PROD: process.env.PROXY_API_KEY_PROD
-    }
-  }
+      PROXY_API_KEY_PROD: process.env.PROXY_API_KEY_PROD,
+    },
+  },
 });
 
-void (async () => {
-  try {
-    await server.init();
-    server.listen();
-  } catch (error) {
-    console.log(error);
-  }
-})();
+(async () => {
+  await server.init();
+  server.listen();
+})().catch((error) => {
+  // eslint-disable-next-line no-console
+  console.log(error);
+});

@@ -1,4 +1,6 @@
+// eslint-disable-next-line import/no-duplicates
 import type express from 'express';
+// eslint-disable-next-line import/no-duplicates
 import type { Request } from 'express';
 import type { IncomingHttpHeaders } from 'http';
 import type mysql from 'mysql';
@@ -6,16 +8,38 @@ import type mysql from 'mysql';
 export type App = express.Application;
 
 export interface AuthRequest extends Request {
+  body: {
+    email: string;
+    password: string;
+  };
+  // eslint-disable-next-line @typescript-eslint/ban-types
   decoded?: object | string;
   headers: IncomingHttpHeaders;
-  kovaToken?: string;
   token?: string;
+}
+
+export interface Config {
+  id: string;
+  login: ConfigLogin;
+  register: ConfigRegister;
+  routers: ConfigRouter[];
+  whitelist: string[];
+}
+
+export interface ConfigLogin {
+  enabled: boolean;
+  endpoint: string;
+  path: string;
+}
+
+export interface ConfigRegister extends ConfigLogin {
+  public: boolean;
 }
 
 export interface ConfigRequest {
   auth: ConfigRequestAuth;
   contentTypes: ConfigRequestContentTypes;
-  dataPath: Array<string>;
+  dataPath: Array<string | number>;
   envHostname: string;
   headers: Array<ConfigRequestHeader>;
   params: Array<ConfigRequestParam>;
@@ -38,13 +62,13 @@ enum ConfigRequestAuthType {
 export type ConfigRequestAuthTypes = keyof typeof ConfigRequestAuthType;
 
 enum ConfigRequestAuthMethod {
-  'query params'
+  'query params',
 }
 
 export type ConfigRequestAuthMethods = keyof typeof ConfigRequestAuthMethod;
 
 export interface ConfigRequestContentTypes {
-  [index: string]: Array<ContentTypeValues>
+  [index: string]: Array<ContentTypeValues>;
   html: Array<ContentTypeValues>;
   img: Array<ContentTypeValues>;
   json: Array<ContentTypeValues>;
@@ -63,7 +87,7 @@ export interface ConfigRequestParam {
 
 enum ConfigRequestParamType {
   route,
-  query
+  query,
 }
 
 export type ConfigRequestParamTypes = keyof typeof ConfigRequestParamType;
@@ -86,13 +110,13 @@ enum ConfigRouteMethod {
   get,
   patch,
   post,
-  put
+  put,
 }
 
 export type ConfigRouteMethods = keyof typeof ConfigRouteMethod;
 
 enum ConfigRouteType {
-  proxy
+  proxy,
 }
 
 export type ConfigRouteTypes = keyof typeof ConfigRouteType;
@@ -104,11 +128,11 @@ enum ContentTypeValue {
   'image/jpeg',
   'image/png',
   'application/xml',
-  'text/xml'
+  'text/xml',
 }
 
 enum ConnectionKey {
-  'mysqlConnection'
+  'mysqlConnection',
 }
 
 export type ConnectionKeys = keyof typeof ConnectionKey;
@@ -130,13 +154,13 @@ export interface EnvConfig {
   readonly id: string;
   readonly database: Database;
   readonly port: string;
-  readonly proxy: Proxy;
+  readonly proxy: ProxyEnv;
 }
 
 export interface ExpressRequest extends Request {
-  decoded?: object;
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  decoded?: object | string;
   headers: IncomingHttpHeaders;
-  kovaToken?: string;
   token?: string;
 }
 
@@ -150,17 +174,21 @@ export type MySqlConnection = mysql.Connection;
 
 export type MySqlPool = mysql.Pool;
 
-export interface Proxy {
+export interface ProxyEnv {
   hosts: { [key: string]: string };
   keys: { [key: string]: string };
 }
 
 export interface ProxyRequest extends Request {
-  data?: any;
+  data?: unknown;
+}
+
+export interface TokenPayload {
+  email: string;
 }
 
 export interface User {
-  id: number,
+  id: number;
   email: string;
   password: string;
   [key: string]: unknown;

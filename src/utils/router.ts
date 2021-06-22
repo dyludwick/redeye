@@ -4,7 +4,7 @@ import { fetchProxyData } from '../middleware/proxy';
 import { ConfigRoute, ConfigRouter, ProxyRequest } from '../types';
 
 class RouterUtils {
-  static generateDynamicRouter = (routes: ConfigRouter['routes']) => {
+  static generateDynamicRouter = (routes: ConfigRouter['routes']): Router => {
     const router = Router();
 
     routes.forEach((route: ConfigRoute) => {
@@ -15,7 +15,7 @@ class RouterUtils {
           fetchProxyData(route),
           (req: ProxyRequest, res: Response) => {
             res.send(req.data);
-          }
+          },
         );
       }
     });

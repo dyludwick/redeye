@@ -5,11 +5,12 @@ import {
   ConnectionKeys,
   Database,
   MySqlConnection,
-  MySqlPool
+  MySqlPool,
+  User,
 } from '../types';
 
 export default class DatabaseUtils {
-  static initDB = async (app: App, database: Database) => {
+  static initDB = async (app: App, database: Database): Promise<void> => {
     try {
       switch (database.id) {
         case 'mysql': {
@@ -17,7 +18,7 @@ export default class DatabaseUtils {
           const connectedDB = DatabaseUtils.setConnection(
             connection,
             'mysqlConnection',
-            database
+            database,
           );
           app.set('database', connectedDB);
           await MySql.setDB(app, connectedDB);
@@ -27,25 +28,30 @@ export default class DatabaseUtils {
           logger.warn(`Database: ${database.id} not recognized`);
       }
     } catch (err) {
-      logger.error(`Failed to initialize DB: ${err}`);
+      logger.error(`Failed to initialize DB: ${(err as Error).message}`);
       throw err;
     }
   };
 
-  static getUser = (database: Database, email: string) => {
+  static getUser = (
+    database: Database,
+    email: string,
+  ): Promise<User | undefined> | undefined => {
     switch (database.id) {
       case 'mysql':
         return MySql.getUser(database, email);
       default:
-        logger.warn(`Database: ${database.id} not recognized`);
+        return Promise.reject(
+          new Error(`Database: ${database.id} not recognized`),
+        );
     }
   };
 
   static setConnection = (
     connection: MySqlConnection | MySqlPool,
     connectionKey: ConnectionKeys,
-    database: Database
-  ) => {
+    database: Database,
+  ): Database => {
     const connectedDB = { ...database };
     connectedDB[connectionKey] = connection;
 
@@ -54,13 +60,15 @@ export default class DatabaseUtils {
 
   static setUser = (
     database: Database,
-    user: { email: string; password: string }
-  ) => {
+    user: { email: string; password: string },
+  ): Promise<void> => {
     switch (database.id) {
       case 'mysql':
         return MySql.setUser(database, user);
       default:
-        logger.warn(`Database: ${database.id} not recognized`);
+        return Promise.reject(
+          new Error(`Database: ${database.id} not recognized`),
+        );
     }
   };
 }

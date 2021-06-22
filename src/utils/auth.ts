@@ -2,7 +2,7 @@ import fs from 'fs';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { logger } from '../config/winston';
-import { User } from '../types';
+import { AuthRequest, TokenPayload } from '../types';
 
 let privateKey: jwt.Secret;
 let publicKey: jwt.Secret;
@@ -13,16 +13,25 @@ try {
 } catch (err) {
   logger.error(
     `Key file does not exist - did you forget to run genKeys script?
-    ${err}`
+    ${(err as Error).message}`,
   );
 }
 
 class AuthUtils {
-  static comparePassword = (plainTextPassword: string, hash: string) => {
+  static comparePassword = (
+    plainTextPassword: string,
+    hash: string,
+  ): Promise<boolean> => {
     return bcrypt.compare(plainTextPassword, hash);
-  }
+  };
 
-  static hashPassword = async (user: { email: string, password: string }) => {
+  static hashPassword = async (user: {
+    email: string;
+    password: string;
+  }): Promise<{
+    email: string;
+    password: string;
+  }> => {
     const saltRounds = 10;
 
     try {
@@ -34,21 +43,21 @@ class AuthUtils {
       logger.error(err);
       throw err;
     }
-  }
+  };
 
-  static signToken = (payload: any) => {
+  static signToken = (payload: TokenPayload): string => {
     const signOptions: jwt.SignOptions = {
       expiresIn: '1h',
-      algorithm: 'RS256'
+      algorithm: 'RS256',
     };
 
     return jwt.sign(payload, privateKey, signOptions);
   };
 
-  static verifyToken = (token: any) => {
+  static verifyToken = (token: string): AuthRequest['decoded'] => {
     const verifyOptions = {
       maxAge: '1h',
-      algorithm: ['RS256']
+      algorithm: ['RS256'],
     };
 
     return jwt.verify(token, publicKey, verifyOptions);

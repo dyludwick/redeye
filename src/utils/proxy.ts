@@ -1,14 +1,51 @@
 import { Request } from 'express';
 import { HeadersInit, Response } from 'node-fetch';
-import { ConfigRequest, ConfigRequestContentTypes, ConfigRoute, Proxy } from '../types';
+import {
+  ConfigRequest,
+  ConfigRequestContentTypes,
+  ConfigRoute,
+  ProxyEnv,
+} from '../types';
+
+interface DataPathObj {
+  [key: string]: unknown;
+}
 
 class ProxyUtils {
-  static applyDataPath = (data: any, dataPath: ConfigRequest['dataPath']) => {
-    let result = data;
+  static applyDataPath = (data: {[key: string]: unknown} | unknown[], dataPath: ConfigRequest['dataPath']) => {
+    let nextValue = data;
+    let result: unknown | undefined;
 
-    dataPath.forEach((path) => {
-      result = result[path];
-    });
+    for (let [index, path] of dataPath.entries()) {
+      if (typeof path === 'number' && Array.isArray(nextValue)) {
+        if (index === dataPath.length - 1) {
+          result = nextValue[path];
+          break;
+        }
+        if (Array.isArray(nextValue[path])) {
+          nextValue = nextValue[path] as unknown[];
+        } else if (typeof nextValue[path] === 'object') {
+          nextValue = nextValue[path] as DataPathObj;
+        } else {
+          result = nextValue[path];
+          break;
+        }
+      }
+      if (typeof path === 'string' && typeof nextValue === 'object' && !Array.isArray(nextValue)) {
+        if (index === dataPath.length - 1) {
+          result = nextValue[path];
+          break;
+        }
+        if (Array.isArray(nextValue[path])) {
+          nextValue = nextValue[path] as unknown[];
+        } else if (typeof nextValue[path] === 'object') {
+          nextValue = nextValue[path] as DataPathObj;
+        } else {
+          result = nextValue[path];
+          break;
+        }
+      }
+    }
 
     return result;
   };
@@ -26,7 +63,12 @@ class ProxyUtils {
     return undefined;
   };
 
-  static applyParams = (proxyRequest: ConfigRequest, reqParams: Request['params'], reqQuery: Request['query'], proxyEnv: Proxy) => {
+  static applyParams = (
+    proxyRequest: ConfigRequest,
+    reqParams: Request['params'],
+    reqQuery: Request['query'],
+    proxyEnv: ProxyEnv,
+  ) => {
     const env = reqQuery.env ? reqQuery.env : 'DEV';
     const { envHostname } = proxyRequest;
     const url: string =
@@ -40,7 +82,7 @@ class ProxyUtils {
         if (param.type === 'route') {
           result = result.replace(
             `$${param.name}$`,
-            `${reqParams[param.name]}`
+            `${reqParams[param.name]}`,
           );
         }
         if (param.type === 'query') {
@@ -60,10 +102,6 @@ class ProxyUtils {
 
     return result;
   };
-
-  // static paramExists = (param, obj) => {
-  //   return param.required && obj[param];
-  // };
 
   static parseData = async (route: ConfigRoute, response: Response) => {
     const contentType = response.headers.get('Content-Type');
@@ -110,7 +148,7 @@ class ProxyUtils {
       data = await response.text();
     }
 
-    return data;
+    return data as unknown;
   };
 }
 

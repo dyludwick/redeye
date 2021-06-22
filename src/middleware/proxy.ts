@@ -2,21 +2,25 @@ import { Response, NextFunction } from 'express';
 import fetch, { RequestInit } from 'node-fetch';
 import ProxyUtils from '../utils/proxy';
 import { logger } from '../config/winston';
-import { ConfigRoute, ProxyRequest } from '../types';
+import { ConfigRoute, ProxyEnv, ProxyRequest } from '../types';
 
 const fetchProxyData = (route: ConfigRoute) => {
-  return async (req: ProxyRequest, res: Response, next: NextFunction) => {
+  return async (
+    req: ProxyRequest,
+    _res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
-      const proxyEnv = req.app.get('proxy');
+      const proxyEnv = req.app.get('proxy') as ProxyEnv;
       const url = ProxyUtils.applyParams(
         route.request,
         req.params,
         req.query,
-        proxyEnv
+        proxyEnv,
       );
       const config: RequestInit = {
         method: route.method,
-        headers: ProxyUtils.applyHeaders(route.request)
+        headers: ProxyUtils.applyHeaders(route.request),
       };
 
       if (
@@ -39,4 +43,5 @@ const fetchProxyData = (route: ConfigRoute) => {
   };
 };
 
+// eslint-disable-next-line import/prefer-default-export
 export { fetchProxyData };

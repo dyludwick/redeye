@@ -2,16 +2,16 @@ module.exports = {
   "parser": "@typescript-eslint/parser",
   "extends": [
     "airbnb-typescript/base",
-    "plugin:prettier/recommended",
-    // "plugin:@typescript-eslint/recommended",
-    // "plugin:@typescript-eslint/recommended-requiring-type-checking"
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    "plugin:prettier/recommended"
   ],
   "parserOptions": {
     "project": "./tsconfig.json",
     "sourceType": "module"
   },
   "plugins": [
-    "import",
+    // "import",
     "@typescript-eslint"
   ],
   "env": {
