@@ -1,28 +1,34 @@
-import app from './app';
 import { Request, Response, NextFunction } from 'express';
 import fs from 'fs';
 import http from 'http';
 import path from 'path';
+import app from './app';
+import { HttpError } from './errors';
 import router from './router';
 import { logger } from './config/winston';
 import DatabaseUtils from './utils/database';
-import { Database, EnvConfig, Proxy } from './types';
+import type { Config, Database, EnvConfig, ProxyEnv } from './types';
 
 class Server {
   configId: string;
+
   database: Database | undefined;
+
   port: number;
-  proxy: Proxy | undefined;
+
+  proxy: ProxyEnv | undefined;
+
   server: http.Server | null;
+
   constructor(config: EnvConfig) {
     this.configId = config.id;
     this.database = config.database;
-    this.port = config.port ? parseInt(config.port) : 8080;
+    this.port = config.port ? parseInt(config.port, 10) : 8080;
     this.proxy = config.proxy;
     this.server = null;
   }
 
-  init = async () => {
+  init = async (): Promise<void> => {
     // Init server
     const server = http.createServer(app);
 
@@ -36,7 +42,7 @@ class Server {
     } catch (err) {
       logger.error(
         `JSON configuration not found
-        ${err}`
+        ${(err as Error).message}`,
       );
     }
 
@@ -49,31 +55,45 @@ class Server {
     app.use(router(app));
 
     // Init error handling
-    app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-      logger.error(
-        `Error: ${err.status || 500} -
-        Message: ${err.message}`
-      );
-      res.status(err.status || 500).send(err.message);
-    });
+    app.use(
+      (
+        err: Error | HttpError,
+        req: Request,
+        res: Response,
+        // NOTE: next is required for express error handling to function
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        next: NextFunction,
+      ) => {
+        let error = { ...err } as HttpError;
+        if (!('status' in err)) {
+          error = new HttpError(500, err.message);
+        }
+        logger.error(
+          `Error: ${error.status} -
+          Message: ${err.message}`,
+        );
+        res.status(error.status).send(err.message);
+      },
+    );
 
     this.server = server;
   };
 
-  getConfiguration = () => {
+  getConfiguration = (): Config => {
     const jsonPath = path.join(
       __dirname,
       '..',
       'json',
-      `${this.configId}.json`
+      `${this.configId}.json`,
     );
-    const config = JSON.parse(fs.readFileSync(jsonPath).toString());
+    const config = JSON.parse(fs.readFileSync(jsonPath).toString()) as Config;
+
     return config;
   };
 
-  listen = () => {
+  listen = (): void => {
     this.server?.listen(this.port, () =>
-      logger.info(`RedEye listening on port ${this.port}!`)
+      logger.info(`RedEye listening on port ${this.port}!`),
     );
   };
 }

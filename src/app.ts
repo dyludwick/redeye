@@ -1,6 +1,5 @@
 import express from 'express';
 import compression from 'compression';
-import bodyParser from 'body-parser';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { LoggerStream } from './config/winston';
@@ -15,9 +14,9 @@ app.use(compression());
 app.use(helmet());
 
 // parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: false }));
 // parse application/json
-app.use(bodyParser.json());
+app.use(express.json());
 
 // Http logging
 app.use(morgan('combined', { stream: new LoggerStream() }));
