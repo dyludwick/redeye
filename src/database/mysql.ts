@@ -1,4 +1,4 @@
-import mysql from 'mysql';
+import mysql from 'mysql2';
 import { logger } from '../config/winston';
 import { App, Database, User } from '../types';
 
@@ -101,14 +101,15 @@ export default class MySql {
       mysqlConnection?.query(
         'SELECT * FROM users WHERE email = ?',
         [username],
-        (error, results: User[]) => {
+        (error, result) => {
+          const users = result as User[];
           if (error) {
             reject(error);
           }
-          if (results.length === 0) {
+          if (users.length === 0) {
             resolve(undefined);
           }
-          resolve(results[0]);
+          resolve(users[0]);
         },
       );
     });
@@ -117,19 +118,7 @@ export default class MySql {
     new Promise<Database['name']>((resolve, reject) => {
       const { mysqlConnection } = database;
 
-      if (mysqlConnection && 'changeUser' in mysqlConnection) {
-        // Connection
-        mysqlConnection.changeUser({ database: database.name }, (error) => {
-          if (error) {
-            reject(error);
-            return;
-          }
-
-          logger.info(`MySQL selected database: ${database.name}`);
-          resolve(database.name);
-        });
-      } else {
-        // Pool
+      if (database.pool) {
         mysqlConnection?.end((error) => {
           if (error) {
             reject(error);
@@ -144,6 +133,17 @@ export default class MySql {
           );
           app.set('database', updatedDB);
 
+          resolve(database.name);
+        });
+      } else {
+        // Connection
+        mysqlConnection?.changeUser({ database: database.name }, (error) => {
+          if (error) {
+            reject(error);
+            return;
+          }
+
+          logger.info(`MySQL selected database: ${database.name}`);
           resolve(database.name);
         });
       }
