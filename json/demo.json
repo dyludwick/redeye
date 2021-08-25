@@ -26,7 +26,7 @@
         {
           "public": true,
           "type": "proxy",
-          "endpoint": "/getLegislators/:id",
+          "endpoint": "/legistlators/:id",
           "method": "get",
           "request": {
             "auth": {

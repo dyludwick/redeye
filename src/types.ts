@@ -3,7 +3,7 @@ import type express from 'express';
 // eslint-disable-next-line import/no-duplicates
 import type { Request } from 'express';
 import type { IncomingHttpHeaders } from 'http';
-import type mysql from 'mysql';
+import type mysql from 'mysql2';
 
 export type App = express.Application;
 
