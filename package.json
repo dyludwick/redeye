@@ -46,7 +46,7 @@
     "gulp-sourcemaps": "^2.6.5",
     "gulp-typescript": "^6.0.0-alpha.1",
     "mkdirp": "^0.5.1",
-    "mocha": "^7.0.1",
+    "mocha": "^10.2.0",
     "nock": "^12.0.1",
     "nodemon": "^1.19.1",
     "prettier": "^2.3.0",
